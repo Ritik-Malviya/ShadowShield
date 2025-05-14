@@ -1,0 +1,8 @@
+{
+  "scripts": {
+    "start": "sh ./start.sh"
+  },
+  "envVars": {
+    "NODE_ENV": "production"
+  }
+}
