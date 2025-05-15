@@ -1,2 +1,4 @@
 #!/bin/sh
-cd Backend && npm start
+# This script explicitly runs the backend server
+cd Backend
+node server.js

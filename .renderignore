@@ -1,0 +1,2 @@
+# Ignore Frontend directory as we're only deploying the Backend
+Frontend/

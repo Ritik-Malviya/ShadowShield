@@ -2,8 +2,9 @@
   "name": "shadowshield",
   "version": "1.0.0",
   "description": "ShadowShield secure file sharing application",
+  "main": "Backend/server.js",
   "scripts": {
-    "start": "cd Backend && node server.js",
+    "start": "node Backend/server.js",
     "dev": "cd Backend && nodemon server.js",
     "client": "cd Frontend && npm run dev",
     "install-deps": "npm install && cd Backend && npm install && cd ../Frontend && npm install"
