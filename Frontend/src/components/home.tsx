@@ -30,11 +30,7 @@ const Home = ({
   }
 
   return (
-    <Layout
-      userName={userName}
-      isAuthenticated={isAuthenticated}
-      activePath={location.pathname}
-    >
+    <Layout>
       <Outlet />
     </Layout>
   );

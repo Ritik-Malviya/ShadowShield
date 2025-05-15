@@ -36,7 +36,7 @@ const FileDashboard = () => {
   
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
-    const options = { month: 'short', day: 'numeric', year: 'numeric' };
+    const options = { month: 'short', day: 'numeric', year: 'numeric' } as const;
     return new Date(dateString).toLocaleDateString('en-US', options);
   };
   

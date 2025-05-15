@@ -1,3 +1,14 @@
+import React from 'react';
+import { useAuth } from '../../contexts/AuthContext';
+import { Shield } from 'lucide-react';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent
+} from '../ui/card';
+
 // Add session ID to your component
 const Settings = () => {
   const { user, sessionId } = useAuth();
@@ -19,30 +30,22 @@ const Settings = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="p-4 bg-gray-800 rounded-lg">
-            <h3 className="text-sm font-medium text-white mb-2">Session Information</h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <span className="text-xs text-gray-400">Session ID</span>
-                <div className="font-mono text-xs text-yellow-400 break-all bg-gray-900 p-2 rounded">
-                  {sessionId}
+            <h3 className="text-md text-white mb-2">Session Information</h3>
+            {sessionId ? (
+              <div className="text-sm text-white">
+                <p>Your current session is active and secure.</p>
+                <div className="mt-2">
+                  <span className="text-gray-400">Session ID:</span> {sessionId.substring(0, 12)}...
                 </div>
               </div>
-              
-              <div className="space-y-1">
-                <span className="text-xs text-gray-400">IP Address</span>
-                <div className="font-mono text-xs text-white">127.0.0.1</div>
-                <span className="text-xs text-gray-400">Last Activity</span>
-                <div className="font-mono text-xs text-white">{new Date().toLocaleString()}</div>
-              </div>
-            </div>
+            ) : (
+              <p className="text-yellow-500">No active session detected.</p>
+            )}
           </div>
-          
-          {/* Other security settings */}
         </CardContent>
       </Card>
-      
-      {/* Rest of settings */}
     </div>
   );
 };
+
+export default Settings;

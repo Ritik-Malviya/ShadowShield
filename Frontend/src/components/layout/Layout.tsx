@@ -36,6 +36,11 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     { name: 'Settings', path: '/settings', icon: <Settings size={20} /> },
     { name: 'Profile', path: '/profile', icon: <User size={20} /> },
   ];
+  
+  // Add a special item for API connection testing
+  const debugItems: SidebarItem[] = [
+    { name: 'API Connection Test', path: '/api-connection-test.html', icon: <Shield size={20} /> },
+  ];
 
   const handleLogout = async () => {
     try {
@@ -96,6 +101,32 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 </div>
               </Link>
             ))}
+            
+            {/* Debug items - API testing tools */}
+            <div className="my-4 pt-4 border-t border-gray-800">
+              {sidebarOpen && (
+                <p className="text-xs text-gray-500 mb-2 px-3">Debug Tools</p>
+              )}
+              
+              {debugItems.map((item) => (
+                <a
+                  key={item.path}
+                  href={item.path}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={cn(
+                    "flex items-center py-3 px-3 rounded-md transition-colors",
+                    "text-gray-400 hover:bg-gray-800 hover:text-white",
+                    !sidebarOpen && "justify-center"
+                  )}
+                >
+                  <div className={cn("flex items-center", !sidebarOpen && "justify-center")}>
+                    {item.icon}
+                    {sidebarOpen && <span className="ml-3">{item.name}</span>}
+                  </div>
+                </a>
+              ))}
+            </div>
           </div>
         </div>
         

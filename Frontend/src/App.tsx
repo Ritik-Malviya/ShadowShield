@@ -21,46 +21,10 @@ import EnhancedConnectionMonitor from "./components/debug/ConnectionStatusChecke
 // IMPORTANT: Hardcoded production URL to solve connection issues
 const PRODUCTION_API_URL = 'https://shadowshield-backend.onrender.com';
 
-// API Connection Status Checker Component
+// Simpler API Connection Status Checker Component for legacy code
 const ConnectionStatusChecker = () => {
-  const [apiStatus, setApiStatus] = useState<'checking' | 'connected' | 'error'>('checking');
-  const [errorMessage, setErrorMessage] = useState('');
-
-  useEffect(() => {
-    const checkApiConnection = async () => {
-      try {
-        const response = await axios.get(`${PRODUCTION_API_URL}/health`);
-        if (response.status === 200) {
-          setApiStatus('connected');
-          console.log('Backend API connection successful:', response.data);
-        }
-      } catch (error) {
-        console.error('API Connection Error:', error);
-        setApiStatus('error');
-        setErrorMessage('Cannot connect to backend API. Please check your connection.');
-      }
-    };
-
-    checkApiConnection();
-  }, []);
-
-  if (apiStatus === 'checking') {
-    return (
-      <div className="fixed bottom-4 right-4 bg-yellow-600 text-white p-2 rounded-md text-sm z-50">
-        Checking API connection...
-      </div>
-    );
-  }
-
-  if (apiStatus === 'error') {
-    return (
-      <div className="fixed bottom-4 right-4 bg-red-600 text-white p-2 rounded-md text-sm z-50">
-        {errorMessage}
-      </div>
-    );
-  }
-
-  return null; // Don't show anything if connected
+  // Skip implementation as we now use the enhanced version
+  return null;
 };
 
 // Update the SettingsPage component 

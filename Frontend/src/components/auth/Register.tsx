@@ -93,8 +93,7 @@ const Register = () => {
     if (formErrors[name]) {
       setFormErrors(prev => ({ ...prev, [name]: '' }));
     }
-  };
-  const handleSubmit = async (e: React.FormEvent) => {
+  };  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validateForm()) {
@@ -106,22 +105,71 @@ const Register = () => {
     
     try {
       console.log("Register submit with API URL:", import.meta.env.VITE_API_URL);
-      await register(formData.name, formData.email, formData.password);
       
-      // Show success state with session ID
+      // First try using the auth context register function
+      try {
+        await register(formData.name, formData.email, formData.password);
+        
+        // Show success state with session ID
+        setRegisterSuccess(true);
+        setSessionIdDisplay(localStorage.getItem('sessionId'));
+        
+        // Navigate after a short delay to show session ID
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 2000);
+        
+        return; // Exit early if successful
+      } catch (error: any) {
+        console.error('Registration using auth context failed:', error);
+        // Fall through to direct API approach
+      }
+      
+      // Direct API approach as a fallback
+      console.log("Attempting direct API registration as fallback");
+      const PRODUCTION_API_URL = 'https://shadowshield-backend.onrender.com';
+      
+      const response = await fetch(`${PRODUCTION_API_URL}/api/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: formData.name, 
+          email: formData.email, 
+          password: formData.password
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Registration failed: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      
+      // Store token and user data
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('userId', data.user.id);
+      
+      // Generate a session ID
+      const sessionId = Math.random().toString(36).substring(2, 15);
+      localStorage.setItem('sessionId', sessionId);
+      
+      // Show success state
       setRegisterSuccess(true);
-      setSessionIdDisplay(localStorage.getItem('sessionId'));
+      setSessionIdDisplay(sessionId);
       
-      // Navigate after a short delay to show session ID
+      // Navigate after a short delay
       setTimeout(() => {
         navigate('/dashboard');
       }, 2000);
+      
     } catch (error: any) {
       console.error('Registration error details:', error);
       if (error.message === 'Network Error') {
         setErrorMessage('Network error - Check your connection and make sure the backend server is running. Contact support if this persists.');
       } else {
-        setErrorMessage(error.response?.data?.error || 'Registration failed');
+        setErrorMessage(error.response?.data?.error || error.message || 'Registration failed');
       }
       console.error('Registration error:', error);
     } finally {

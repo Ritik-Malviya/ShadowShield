@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShadowShield API Connection Tester</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f7f9fc;
+        }
+        h1 {
+            border-bottom: 2px solid #5755d9;
+            padding-bottom: 10px;
+            color: #32325d;
+        }
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        button {
+            background-color: #5755d9;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #4a48c0;
+        }
+        pre {
+            background-color: #f1f1f1;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        .success {
+            color: #2ecc71;
+        }
+        .error {
+            color: #e74c3c;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>ShadowShield API Connection Tester</h1>
+    
+    <div class="card">
+        <h2>API Environment</h2>
+        <div id="apiInfo">
+            <p>Current API URL: <span id="currentApiUrl">Loading...</span></p>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Test API Connection</h2>
+        <div>
+            <label for="apiEndpoint">API Endpoint:</label>
+            <input type="text" id="apiEndpoint" value="/api/auth/health" />
+            <button onclick="testApi()">Test Connection</button>
+            <button onclick="testRegister()">Test Registration</button>
+            <button onclick="testLogin()">Test Login</button>
+        </div>
+        <div id="apiResults">
+            <p>Results will appear here...</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Network Requests</h2>
+        <button onclick="clearLogs()">Clear Logs</button>
+        <div id="networkLogs">
+            <p>Network logs will appear here...</p>
+        </div>
+    </div>
+
+    <script>
+        // Constants
+        const PRODUCTION_API_URL = 'https://shadowshield-backend.onrender.com';
+        
+        // Display environment info
+        document.getElementById('currentApiUrl').textContent = PRODUCTION_API_URL;
+        
+        // Log network requests
+        const logNetwork = (method, url, status, data) => {
+            const logsDiv = document.getElementById('networkLogs');
+            const timestamp = new Date().toISOString();
+            const logEntry = document.createElement('div');
+            
+            let statusClass = 'normal';
+            if (status >= 200 && status < 300) {
+                statusClass = 'success';
+            } else if (status >= 400) {
+                statusClass = 'error';
+            }
+            
+            logEntry.innerHTML = `
+                <p><strong>[${timestamp}]</strong> ${method} ${url} - 
+                <span class="${statusClass}">Status: ${status}</span></p>
+                <pre>${JSON.stringify(data, null, 2)}</pre>
+            `;
+            
+            logsDiv.prepend(logEntry);
+        };
+        
+        // Test any API endpoint
+        const testApi = async () => {
+            const endpoint = document.getElementById('apiEndpoint').value;
+            const resultsDiv = document.getElementById('apiResults');
+            resultsDiv.innerHTML = '<p>Testing connection...</p>';
+            
+            try {
+                const url = `${PRODUCTION_API_URL}${endpoint}`;
+                console.log(`Testing connection to: ${url}`);
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                resultsDiv.innerHTML = `
+                    <p class="success">Connection successful! Status: ${response.status}</p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+                
+                logNetwork('GET', url, response.status, data);
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <p class="error">Connection failed: ${error.message}</p>
+                    <pre>${error.stack}</pre>
+                `;
+                
+                logNetwork('GET', endpoint, 'ERROR', { error: error.message });
+            }
+        };
+        
+        // Test registration endpoint
+        const testRegister = async () => {
+            const resultsDiv = document.getElementById('apiResults');
+            resultsDiv.innerHTML = '<p>Testing registration...</p>';
+            
+            const testUser = {
+                name: `Test User ${Math.floor(Math.random() * 10000)}`,
+                email: `test${Math.floor(Math.random() * 10000)}@example.com`,
+                password: 'Password123!'
+            };
+            
+            try {
+                const url = `${PRODUCTION_API_URL}/api/auth/register`;
+                console.log(`Testing registration at: ${url}`, testUser);
+                
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testUser)
+                });
+                
+                const data = await response.json();
+                
+                resultsDiv.innerHTML = `
+                    <p class="success">Registration test successful! Status: ${response.status}</p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+                
+                // Store token for login test
+                if (data.token) {
+                    localStorage.setItem('testToken', data.token);
+                }
+                
+                logNetwork('POST', url, response.status, data);
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <p class="error">Registration test failed: ${error.message}</p>
+                    <pre>${error.stack}</pre>
+                `;
+                
+                logNetwork('POST', '/api/auth/register', 'ERROR', { error: error.message });
+            }
+        };
+        
+        // Test login endpoint
+        const testLogin = async () => {
+            const resultsDiv = document.getElementById('apiResults');
+            resultsDiv.innerHTML = '<p>Testing login...</p>';
+            
+            const loginData = {
+                email: 'admin@example.com',
+                password: 'admin'
+            };
+            
+            try {
+                const url = `${PRODUCTION_API_URL}/api/auth/login`;
+                console.log(`Testing login at: ${url}`, loginData);
+                
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(loginData)
+                });
+                
+                const data = await response.json();
+                
+                resultsDiv.innerHTML = `
+                    <p class="success">Login test successful! Status: ${response.status}</p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+                
+                logNetwork('POST', url, response.status, data);
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <p class="error">Login test failed: ${error.message}</p>
+                    <pre>${error.stack}</pre>
+                `;
+                
+                logNetwork('POST', '/api/auth/login', 'ERROR', { error: error.message });
+            }
+        };
+        
+        // Clear logs
+        const clearLogs = () => {
+            document.getElementById('networkLogs').innerHTML = '<p>Network logs will appear here...</p>';
+        };
+    </script>
+</body>
+</html>

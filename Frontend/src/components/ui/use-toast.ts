@@ -139,9 +139,9 @@ function dispatch(action: Action) {
   })
 }
 
-type Toast = Omit<ToasterToast, "id">
+type ToastOptions = Omit<ToasterToast, "id">
 
-function toast({ ...props }: Toast) {
+function toast({ ...props }: ToastOptions) {
   const id = genId()
 
   const update = (props: ToasterToast) =>
@@ -175,6 +175,7 @@ export interface Toast {
   title: string;
   description?: string;
   variant?: 'default' | 'destructive';
+  action?: React.ReactNode;
 }
 
 // Simple toast hook for notifications

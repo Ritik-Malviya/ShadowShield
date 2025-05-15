@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "cross-env VITE_API_URL=https://shadowshield-backend.onrender.com vite",
-    "build": "tsc ; vite build",
-    "build-no-errors": "tsc ; vite build",
+    "build": "cross-env VITE_API_URL=https://shadowshield-backend.onrender.com tsc && vite build",
+    "build-no-errors": "cross-env VITE_API_URL=https://shadowshield-backend.onrender.com tsc || vite build",
+    "vercel-build": "cross-env VITE_API_URL=https://shadowshield-backend.onrender.com vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "types:supabase": "npx supabase gen types typescript --project-id $SUPABASE_PROJECT_ID > src/types/supabase.ts"
