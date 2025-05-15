@@ -71,7 +71,7 @@ app.use(fileupload({
 // Enable CORS
 app.use(cors({
   origin: process.env.NODE_ENV === 'production'
-    ? ['https://your-frontend-domain.vercel.app', 'http://localhost:5173']
+    ? ['https://frontend-ritiks-projects-9f564ec3.vercel.app', 'http://localhost:5173']
     : 'http://localhost:5173',
   credentials: true
 }));
