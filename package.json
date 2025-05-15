@@ -2,14 +2,22 @@
   "name": "shadowshield",
   "version": "1.0.0",
   "description": "ShadowShield secure file sharing application",
-  "main": "index.js",
-  "scripts": {
+  "main": "index.js",  "scripts": {
     "start": "node index.js",
     "dev": "cd Backend && nodemon server.js",
     "client": "cd Frontend && npm run dev",
-    "install-deps": "npm install && cd Backend && npm install && cd ../Frontend && npm install"
+    "install-deps": "npm install && cd Backend && npm install && cd ../Frontend && npm install",
+    "test-connection": "node api-connection-test.js",
+    "test-system": "node system-status.js"
   },
   "engines": {
     "node": ">=14.0.0"
+  },
+  "dependencies": {
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "axios": "^1.9.0",
+    "colors": "^1.4.0"
   }
 }

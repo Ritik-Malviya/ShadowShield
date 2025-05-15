@@ -11,10 +11,57 @@ import AISecurityLog from "./components/security/AISecurityLog";
 import UserProfile from './components/user/UserProfile';
 import Layout from "./components/layout/Layout";
 import Navbar from "./components/layout/Navbar";
+import axios from 'axios';
 // Import only Lucide icons
 import { Shield, LogOut, User, Settings as SettingsIcon, Key, UserCircle2 } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
 import FileDashboard from "./components/files/FileDashboard";
+import EnhancedConnectionMonitor from "./components/debug/ConnectionStatusChecker";
+
+// IMPORTANT: Hardcoded production URL to solve connection issues
+const PRODUCTION_API_URL = 'https://shadowshield-backend.onrender.com';
+
+// API Connection Status Checker Component
+const ConnectionStatusChecker = () => {
+  const [apiStatus, setApiStatus] = useState<'checking' | 'connected' | 'error'>('checking');
+  const [errorMessage, setErrorMessage] = useState('');
+
+  useEffect(() => {
+    const checkApiConnection = async () => {
+      try {
+        const response = await axios.get(`${PRODUCTION_API_URL}/health`);
+        if (response.status === 200) {
+          setApiStatus('connected');
+          console.log('Backend API connection successful:', response.data);
+        }
+      } catch (error) {
+        console.error('API Connection Error:', error);
+        setApiStatus('error');
+        setErrorMessage('Cannot connect to backend API. Please check your connection.');
+      }
+    };
+
+    checkApiConnection();
+  }, []);
+
+  if (apiStatus === 'checking') {
+    return (
+      <div className="fixed bottom-4 right-4 bg-yellow-600 text-white p-2 rounded-md text-sm z-50">
+        Checking API connection...
+      </div>
+    );
+  }
+
+  if (apiStatus === 'error') {
+    return (
+      <div className="fixed bottom-4 right-4 bg-red-600 text-white p-2 rounded-md text-sm z-50">
+        {errorMessage}
+      </div>
+    );
+  }
+
+  return null; // Don't show anything if connected
+};
 
 // Update the SettingsPage component 
 const SettingsPage = () => {
@@ -223,6 +270,8 @@ function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
+      <ConnectionStatusChecker />
+      <EnhancedConnectionMonitor />
     </AuthProvider>
   );
 }

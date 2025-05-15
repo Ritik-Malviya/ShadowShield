@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShadowShield API Connection Tester</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: #0f172a;
+            color: #e2e8f0;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1, h2 {
+            color: #eab308;
+        }
+        .test-section {
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: #334155;
+            color: #e2e8f0;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background-color: #475569;
+        }
+        .result {
+            background-color: #0f172a;
+            border-left: 3px solid #eab308;
+            padding: 10px;
+            margin-top: 10px;
+            overflow-x: auto;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .success {
+            border-left-color: #10b981;
+        }
+        .error {
+            border-left-color: #ef4444;
+        }
+        .url-display {
+            font-family: monospace;
+            padding: 5px;
+            background-color: #0f172a;
+            border-radius: 4px;
+            color: #94a3b8;
+        }
+        .controls {
+            margin-bottom: 20px;
+        }
+        #backendUrl {
+            background-color: #1e293b;
+            color: #e2e8f0;
+            border: 1px solid #334155;
+            padding: 8px;
+            border-radius: 4px;
+            width: 100%;
+            max-width: 500px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>ShadowShield API Connection Tester</h1>
+    <p>Use this page to test the connection between the frontend and backend API.</p>
+    
+    <div class="controls">
+        <label for="backendUrl">Backend URL:</label><br>
+        <input type="text" id="backendUrl" value="https://shadowshield-backend.onrender.com" /><br><br>
+        <button id="runAllTests">Run All Tests</button>
+        <button id="resetResults">Reset Results</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>Health Check</h2>
+        <p>Tests basic connectivity to the backend API.</p>
+        <div class="url-display" id="healthUrl"></div>
+        <button id="testHealth">Test Health Endpoint</button>
+        <div class="result" id="healthResult"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Login API</h2>
+        <p>Tests the authentication endpoint with test credentials.</p>
+        <div class="url-display" id="loginUrl"></div>
+        <button id="testLogin">Test Login Endpoint</button>
+        <div class="result" id="loginResult"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Register API</h2>
+        <p>Tests the registration endpoint with randomly generated test credentials.</p>
+        <div class="url-display" id="registerUrl"></div>
+        <button id="testRegister">Test Register Endpoint</button>
+        <div class="result" id="registerResult"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>CORS Test</h2>
+        <p>Tests if CORS is properly configured for this origin.</p>
+        <div class="url-display" id="corsUrl"></div>
+        <button id="testCors">Test CORS Configuration</button>
+        <div class="result" id="corsResult"></div>
+    </div>
+
+    <script>
+        // Update URLs when backend URL changes
+        const backendUrlInput = document.getElementById('backendUrl');
+        const updateUrls = () => {
+            const url = backendUrlInput.value.trim();
+            
+            document.getElementById('healthUrl').textContent = `${url}/health`;
+            document.getElementById('loginUrl').textContent = `${url}/api/auth/login`;
+            document.getElementById('registerUrl').textContent = `${url}/api/auth/register`;
+            document.getElementById('corsUrl').textContent = `${url}/health`;
+        };
+        
+        backendUrlInput.addEventListener('input', updateUrls);
+        updateUrls();
+        
+        // Test functions
+        const testHealth = async () => {
+            const resultElem = document.getElementById('healthResult');
+            resultElem.textContent = 'Testing...';
+            resultElem.className = 'result';
+            
+            const url = document.getElementById('healthUrl').textContent;
+            
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                resultElem.textContent = JSON.stringify(data, null, 2);
+                resultElem.className = 'result success';
+            } catch (error) {
+                resultElem.textContent = `Error: ${error.message}`;
+                resultElem.className = 'result error';
+            }
+        };
+        
+        const testLogin = async () => {
+            const resultElem = document.getElementById('loginResult');
+            resultElem.textContent = 'Testing...';
+            resultElem.className = 'result';
+            
+            const url = document.getElementById('loginUrl').textContent;
+            
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: 'test@example.com',
+                        password: 'password123'
+                    })
+                });
+                
+                const responseText = await response.text();
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                } catch {
+                    data = responseText;
+                }
+                
+                if (response.status === 401) {
+                    resultElem.textContent = `Status: 401 Unauthorized\n\nResponse: ${JSON.stringify(data, null, 2)}\n\nThis is expected for invalid credentials and means the endpoint is working correctly.`;
+                    resultElem.className = 'result success';
+                } else if (response.ok) {
+                    resultElem.textContent = `Status: ${response.status} OK\n\nResponse: ${JSON.stringify(data, null, 2)}`;
+                    resultElem.className = 'result success';
+                } else {
+                    resultElem.textContent = `Status: ${response.status}\n\nResponse: ${JSON.stringify(data, null, 2)}`;
+                    resultElem.className = 'result error';
+                }
+            } catch (error) {
+                resultElem.textContent = `Error: ${error.message}`;
+                resultElem.className = 'result error';
+            }
+        };
+        
+        const testRegister = async () => {
+            const resultElem = document.getElementById('registerResult');
+            resultElem.textContent = 'Testing...';
+            resultElem.className = 'result';
+            
+            const url = document.getElementById('registerUrl').textContent;
+            const randomEmail = `test${Math.floor(Math.random() * 10000)}@example.com`;
+            
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: 'Test User',
+                        email: randomEmail,
+                        password: 'password123'
+                    })
+                });
+                
+                const responseText = await response.text();
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                } catch {
+                    data = responseText;
+                }
+                
+                if (response.ok) {
+                    resultElem.textContent = `Status: ${response.status} OK\n\nResponse: ${JSON.stringify(data, null, 2)}`;
+                    resultElem.className = 'result success';
+                } else {
+                    resultElem.textContent = `Status: ${response.status}\n\nResponse: ${JSON.stringify(data, null, 2)}`;
+                    resultElem.className = 'result error';
+                }
+            } catch (error) {
+                resultElem.textContent = `Error: ${error.message}`;
+                resultElem.className = 'result error';
+            }
+        };
+        
+        const testCors = async () => {
+            const resultElem = document.getElementById('corsResult');
+            resultElem.textContent = 'Testing...';
+            resultElem.className = 'result';
+            
+            const url = document.getElementById('corsUrl').textContent;
+            
+            try {
+                const response = await fetch(url, {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Origin': window.location.origin
+                    }
+                });
+                
+                const corsHeaders = {
+                    'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
+                    'Access-Control-Allow-Methods': response.headers.get('Access-Control-Allow-Methods'),
+                    'Access-Control-Allow-Headers': response.headers.get('Access-Control-Allow-Headers'),
+                    'Access-Control-Allow-Credentials': response.headers.get('Access-Control-Allow-Credentials')
+                };
+                
+                if (corsHeaders['Access-Control-Allow-Origin']) {
+                    resultElem.textContent = `CORS is properly configured!\n\nCORS Headers:\n${JSON.stringify(corsHeaders, null, 2)}`;
+                    resultElem.className = 'result success';
+                } else {
+                    resultElem.textContent = `CORS might not be configured correctly for this origin (${window.location.origin}).\n\nCORS Headers:\n${JSON.stringify(corsHeaders, null, 2)}`;
+                    resultElem.className = 'result error';
+                }
+            } catch (error) {
+                resultElem.textContent = `Error: ${error.message}`;
+                resultElem.className = 'result error';
+            }
+        };
+        
+        // Event listeners
+        document.getElementById('testHealth').addEventListener('click', testHealth);
+        document.getElementById('testLogin').addEventListener('click', testLogin);
+        document.getElementById('testRegister').addEventListener('click', testRegister);
+        document.getElementById('testCors').addEventListener('click', testCors);
+        
+        document.getElementById('runAllTests').addEventListener('click', async () => {
+            await testHealth();
+            await testLogin();
+            await testRegister();
+            await testCors();
+        });
+        
+        document.getElementById('resetResults').addEventListener('click', () => {
+            document.querySelectorAll('.result').forEach(elem => {
+                elem.textContent = '';
+                elem.className = 'result';
+            });
+        });
+    </script>
+</body>
+</html>

@@ -2,6 +2,9 @@ import React, { createContext, useState, useContext, useEffect, ReactNode } from
 import { authAPI } from '../services/api';
 import axios from 'axios';
 
+// IMPORTANT: Hardcoded production URL to solve connection issues
+const PRODUCTION_API_URL = 'https://shadowshield-backend.onrender.com';
+
 // Define types
 type User = {
   id: string;
@@ -75,9 +78,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       // Approach 2: Direct API call with full production URL if first attempt failed
       if (!loginSuccessful) {
         try {
-          const apiUrl = 'https://shadowshield-backend.onrender.com';
-          console.log("Trying direct URL approach:", `${apiUrl}/api/auth/login`);
-          res = await axios.post(`${apiUrl}/api/auth/login`, { email, password }, {
+          console.log("Trying direct URL approach:", `${PRODUCTION_API_URL}/api/auth/login`);
+          res = await axios.post(`${PRODUCTION_API_URL}/api/auth/login`, { email, password }, {
             headers: { 'Content-Type': 'application/json' }
           });
           loginSuccessful = true;
@@ -132,7 +134,44 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const register = async (name: string, email: string, password: string) => {
     setIsLoading(true);
     try {
-      const res = await authAPI.register({ name, email, password });
+      console.log(`Attempting to register with email: ${email}`);
+      console.log("API URL:", import.meta.env.VITE_API_URL || 'Environment variable not set');
+      
+      // Try multiple approaches to handle different deployment scenarios
+      let res;
+      let registerSuccessful = false;
+      let error;
+      
+      // Approach 1: Standard API call through service
+      try {
+        console.log("Trying standard API registration");
+        res = await authAPI.register({ name, email, password });
+        registerSuccessful = true;
+      } catch (err) {
+        console.warn("Standard registration approach failed:", err);
+        error = err;
+      }
+      
+      // Approach 2: Direct API call with full production URL if first attempt failed
+      if (!registerSuccessful) {
+        try {
+          console.log("Trying direct URL approach:", `${PRODUCTION_API_URL}/api/auth/register`);
+          res = await axios.post(`${PRODUCTION_API_URL}/api/auth/register`, { name, email, password }, {
+            headers: { 'Content-Type': 'application/json' }
+          });
+          registerSuccessful = true;
+        } catch (err) {
+          console.warn("Direct URL approach failed:", err);
+          error = err;
+        }
+      }
+      
+      // If all approaches failed, throw the last error
+      if (!registerSuccessful) {
+        throw error;
+      }
+      
+      console.log("Registration API response:", res.data);
       const { token, user } = res.data;
       
       // Generate a session ID
@@ -140,7 +179,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       
       // Store token, user ID, and session ID in localStorage
       localStorage.setItem('token', token);
-      localStorage.setItem('userId', user.id); // Add this line
+      localStorage.setItem('userId', user.id);
       localStorage.setItem('sessionId', generatedSessionId);
       
       setToken(token);

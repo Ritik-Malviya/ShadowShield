@@ -116,13 +116,53 @@ You can use the health check endpoint to verify if your connection to the backen
 https://shadowshield-backend.onrender.com/health
 ```
 
-This will return connection information including:
-- Current timestamp
-- Your request origin
-- CORS configuration status
-- Environment information
+#### Test Tools
 
-If you can access this endpoint but login fails, it's likely an issue with:
+1. **Direct Login Test**:
+   - Included at `/direct-login-test.html` in the frontend deployment
+   - Example: https://frontend-ritiks-projects-9f564ec3.vercel.app/direct-login-test.html
+   - Simple standalone form to test login and registration directly with the backend
+   - Bypasses React to isolate connection issues
+
+2. **API Tester Page**:
+   - Included at `/api-tester.html` in the frontend deployment
+   - Example: https://frontend-ritiks-projects-9f564ec3.vercel.app/api-tester.html
+   - Provides interactive testing of all API endpoints
+
+3. **CORS Test Tool**:
+   - Included at `/cors-test.html` in the frontend deployment
+   - Example: https://frontend-ritiks-projects-9f564ec3.vercel.app/cors-test.html
+   - Specialized tool for diagnosing CORS configuration issues
+   - Tests preflight requests and analyzes CORS headers
+
+2. **Server-side test script**:
+```bash
+# Install axios if not already installed
+npm install axios
+
+# Run the test script
+node api-connection-test.js
+
+# To test against a different backend URL:
+API_URL=https://your-backend-url.com node api-connection-test.js
+```
+
+3. **Browser-side test script**:
+```javascript
+// In your browser console, navigate to the app and run:
+fetch('/connection-test.js')
+  .then(response => response.text())
+  .then(text => eval(text))
+  .then(() => window.testAPI.runAllTests());
+```
+
+These tests check:
+1. Basic connectivity to the /health endpoint
+2. Connectivity to the login endpoint
+3. Connectivity to the register endpoint
+4. CORS configuration
+
+If you can access these endpoints but login/registration fails in the app, it's likely an issue with:
 1. API endpoint paths (missing `/api` prefix)
 2. Authentication credentials
 3. Token handling

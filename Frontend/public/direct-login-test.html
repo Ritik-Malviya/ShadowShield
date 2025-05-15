@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShadowShield Direct Login Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: #0f172a;
+            color: #e2e8f0;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .card {
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        h1, h2 {
+            color: #eab308;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            background-color: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 4px;
+            color: #e2e8f0;
+            font-size: 16px;
+        }
+        button {
+            background-color: #334155;
+            color: #e2e8f0;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #475569;
+        }
+        .result {
+            margin-top: 20px;
+            background-color: #0f172a;
+            border-left: 3px solid #eab308;
+            padding: 12px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            overflow-x: auto;
+        }
+        .error {
+            border-left-color: #ef4444;
+        }
+        .success {
+            border-left-color: #10b981;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #eab308;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <h1>ShadowShield Direct Login Test</h1>
+    <p>This page tests a direct connection to the backend API without using the React application.</p>
+    
+    <div class="card">
+        <h2>Login Test</h2>
+        <form id="loginForm">
+            <label for="email">Email:</label>
+            <input type="email" id="email" placeholder="Enter your email" required>
+            
+            <label for="password">Password:</label>
+            <input type="password" id="password" placeholder="Enter your password" required>
+            
+            <button type="submit" id="loginButton">Login</button>
+        </form>
+        <div id="loginResult" class="result"></div>
+    </div>
+    
+    <div class="card">
+        <h2>Register Test</h2>
+        <form id="registerForm">
+            <label for="regName">Name:</label>
+            <input type="text" id="regName" placeholder="Enter your name" required>
+            
+            <label for="regEmail">Email:</label>
+            <input type="email" id="regEmail" placeholder="Enter your email" required>
+            
+            <label for="regPassword">Password:</label>
+            <input type="password" id="regPassword" placeholder="Enter your password" required>
+            
+            <button type="submit" id="registerButton">Register</button>
+        </form>
+        <div id="registerResult" class="result"></div>
+    </div>
+    
+    <script>
+        // Backend API URL
+        const API_URL = 'https://shadowshield-backend.onrender.com';
+        
+        // Login form handling
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const loginResult = document.getElementById('loginResult');
+            const loginButton = document.getElementById('loginButton');
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            // Show loading state
+            loginButton.disabled = true;
+            loginButton.innerHTML = '<span class="loading"></span> Logging in...';
+            loginResult.textContent = 'Connecting to API...';
+            loginResult.className = 'result';
+            
+            try {
+                console.log('Attempting login with direct fetch to:', `${API_URL}/api/auth/login`);
+                
+                const response = await fetch(`${API_URL}/api/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    loginResult.textContent = `Login successful!\n\nToken: ${data.token}\nUser: ${JSON.stringify(data.user, null, 2)}`;
+                    loginResult.className = 'result success';
+                    
+                    // Store token in localStorage for testing
+                    localStorage.setItem('token', data.token);
+                    console.log('Token stored in localStorage');
+                } else {
+                    loginResult.textContent = `Login failed: ${data.error || 'Unknown error'}`;
+                    loginResult.className = 'result error';
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                loginResult.textContent = `Error: ${error.message}\n\nCheck the browser console for more details.`;
+                loginResult.className = 'result error';
+            } finally {
+                // Reset button
+                loginButton.disabled = false;
+                loginButton.textContent = 'Login';
+            }
+        });
+        
+        // Register form handling
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const registerResult = document.getElementById('registerResult');
+            const registerButton = document.getElementById('registerButton');
+            const name = document.getElementById('regName').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            
+            // Show loading state
+            registerButton.disabled = true;
+            registerButton.innerHTML = '<span class="loading"></span> Registering...';
+            registerResult.textContent = 'Connecting to API...';
+            registerResult.className = 'result';
+            
+            try {
+                console.log('Attempting registration with direct fetch to:', `${API_URL}/api/auth/register`);
+                
+                const response = await fetch(`${API_URL}/api/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name, email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    registerResult.textContent = `Registration successful!\n\nToken: ${data.token}\nUser: ${JSON.stringify(data.user, null, 2)}`;
+                    registerResult.className = 'result success';
+                    
+                    // Store token in localStorage for testing
+                    localStorage.setItem('token', data.token);
+                    console.log('Token stored in localStorage');
+                } else {
+                    registerResult.textContent = `Registration failed: ${data.error || 'Unknown error'}`;
+                    registerResult.className = 'result error';
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                registerResult.textContent = `Error: ${error.message}\n\nCheck the browser console for more details.`;
+                registerResult.className = 'result error';
+            } finally {
+                // Reset button
+                registerButton.disabled = false;
+                registerButton.textContent = 'Register';
+            }
+        });
+    </script>
+</body>
+</html>

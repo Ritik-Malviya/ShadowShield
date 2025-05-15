@@ -1,13 +1,16 @@
 import axios from 'axios';
 
-// Debug the environment variable
-const apiUrl = import.meta.env.VITE_API_URL || 'https://shadowshield-backend.onrender.com';
-console.log('API URL from environment:', apiUrl);
-console.log('Using API base URL for all requests:', apiUrl);
+// IMPORTANT: Hardcoded production URL to solve connection issues
+const PRODUCTION_API_URL = 'https://shadowshield-backend.onrender.com';
 
-// Create an axios instance with base URL
+// Debug the environment variable
+const apiUrl = import.meta.env.VITE_API_URL || PRODUCTION_API_URL;
+console.log('API URL from environment:', apiUrl);
+console.log('Using production API URL for all requests:', PRODUCTION_API_URL);
+
+// Create an axios instance with hardcoded production base URL for reliability
 const api = axios.create({
-  baseURL: apiUrl,
+  baseURL: PRODUCTION_API_URL,
   headers: {
     'Content-Type': 'application/json'
   },

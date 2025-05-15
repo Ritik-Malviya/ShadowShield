@@ -94,7 +94,6 @@ const Register = () => {
       setFormErrors(prev => ({ ...prev, [name]: '' }));
     }
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -106,6 +105,7 @@ const Register = () => {
     setErrorMessage(null);
     
     try {
+      console.log("Register submit with API URL:", import.meta.env.VITE_API_URL);
       await register(formData.name, formData.email, formData.password);
       
       // Show success state with session ID
@@ -117,7 +117,13 @@ const Register = () => {
         navigate('/dashboard');
       }, 2000);
     } catch (error: any) {
-      setErrorMessage(error.response?.data?.error || 'Registration failed');
+      console.error('Registration error details:', error);
+      if (error.message === 'Network Error') {
+        setErrorMessage('Network error - Check your connection and make sure the backend server is running. Contact support if this persists.');
+      } else {
+        setErrorMessage(error.response?.data?.error || 'Registration failed');
+      }
+      console.error('Registration error:', error);
     } finally {
       setIsLoading(false);
     }
