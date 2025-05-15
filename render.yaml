@@ -3,8 +3,8 @@
     {
       "type": "web",
       "name": "shadowshield-backend",
-      "buildCommand": "cd Backend && npm install",
-      "startCommand": "node Backend/server.js",
+      "buildCommand": "npm install && cd Backend && npm install",
+      "startCommand": "node index.js",
       "envVars": {
         "NODE_ENV": "production"
       }

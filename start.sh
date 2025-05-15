@@ -1,4 +1,3 @@
 #!/bin/sh
-# This script explicitly runs the backend server
-cd Backend
-node server.js
+# This script runs the root index.js which redirects to the backend server
+node index.js
