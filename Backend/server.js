@@ -70,9 +70,7 @@ app.use(fileupload({
 
 // Enable CORS
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production'
-    ? ['https://frontend-ritiks-projects-9f564ec3.vercel.app','https://shadowshield-backend.onrender.com', 'http://localhost:5173']
-    : 'http://localhost:5173',
+  origin: "https://frontend-ritiks-projects-9f564ec3.vercel.app",
   credentials: true
 }));
 
