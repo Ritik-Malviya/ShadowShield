@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { authAPI } from '../services/api';
+import axios from 'axios';
 
 // Define types
 type User = {
@@ -49,14 +50,48 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       return window.crypto.randomUUID();
     }
     return `sess_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-  };
-
-  // Login function
+  };  // Login function
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
       console.log(`Attempting to login with email: ${email}`);
-      const res = await authAPI.login({ email, password });
+      console.log("API URL:", import.meta.env.VITE_API_URL || 'Environment variable not set');
+      
+      // Try multiple approaches to handle different deployment scenarios
+      let res;
+      let loginSuccessful = false;
+      let error;
+      
+      // Approach 1: Standard API call through service
+      try {
+        console.log("Trying standard API login");
+        res = await authAPI.login({ email, password });
+        loginSuccessful = true;
+      } catch (err) {
+        console.warn("Standard login approach failed:", err);
+        error = err;
+      }
+      
+      // Approach 2: Direct API call with full production URL if first attempt failed
+      if (!loginSuccessful) {
+        try {
+          const apiUrl = 'https://shadowshield-backend.onrender.com';
+          console.log("Trying direct URL approach:", `${apiUrl}/api/auth/login`);
+          res = await axios.post(`${apiUrl}/api/auth/login`, { email, password }, {
+            headers: { 'Content-Type': 'application/json' }
+          });
+          loginSuccessful = true;
+        } catch (err) {
+          console.warn("Direct URL approach failed:", err);
+          error = err;
+        }
+      }
+      
+      // If all approaches failed, throw the last error
+      if (!loginSuccessful) {
+        throw error;
+      }
+      
       console.log("Login API response:", res.data);
       
       const { token, user } = res.data;
@@ -67,7 +102,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       
       // Store token, user ID, and session ID in localStorage
       localStorage.setItem('token', token);
-      localStorage.setItem('userId', user.id); // Add this line
+      localStorage.setItem('userId', user.id);
       localStorage.setItem('sessionId', generatedSessionId);
       
       setToken(token);
@@ -75,6 +110,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setSessionId(generatedSessionId);
       
       console.log("Login successful. User:", user);
+      
     } catch (error: any) {
       console.error('Login failed:', error);
       // Add more debug information for errors

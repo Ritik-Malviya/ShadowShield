@@ -1,11 +1,18 @@
 import axios from 'axios';
 
+// Debug the environment variable
+const apiUrl = import.meta.env.VITE_API_URL || 'https://shadowshield-backend.onrender.com';
+console.log('API URL from environment:', apiUrl);
+console.log('Using API base URL for all requests:', apiUrl);
+
 // Create an axios instance with base URL
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'https://shadowshield-backend.onrender.com',
+  baseURL: apiUrl,
   headers: {
     'Content-Type': 'application/json'
-  }
+  },
+  // Add timeout to avoid hanging requests
+  timeout: 10000,
 });
 
 // Add a request interceptor to include the token in requests
@@ -15,6 +22,8 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    // Log the request URL for debugging
+    console.log(`API Request to: ${config.baseURL}${config.url}`);
     return config;
   },
   (error) => {

@@ -111,6 +111,24 @@ app.get('/', (req, res) => {
   });
 });
 
+// Health check route for connection testing
+app.get('/health', (req, res) => {
+  res.json({
+    success: true,
+    message: 'API health check',
+    timestamp: new Date().toISOString(),
+    cors: {
+      origin: req.headers.origin || 'Not provided',
+      allowedOrigins: [
+        'https://frontend-ritiks-projects-9f564ec3.vercel.app',
+        'https://shadowshield.vercel.app'
+      ]
+    },
+    environment: process.env.NODE_ENV,
+    info: 'If you see this message, CORS is properly configured for your origin'
+  });
+});
+
 // Serve static files in production
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '../Frontend/dist')));

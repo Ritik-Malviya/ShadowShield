@@ -28,8 +28,20 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  define: {
+    // Ensure environment variables are properly exposed
+    'import.meta.env.VITE_API_URL': 
+      JSON.stringify(process.env.VITE_API_URL || 'https://shadowshield-backend.onrender.com')
+  },
   server: {
     // @ts-ignore
     allowedHosts: true,
+    proxy: process.env.NODE_ENV === "development" ? {
+      '/api': {
+        target: 'https://shadowshield-backend.onrender.com',
+        changeOrigin: true,
+        secure: true,
+      }
+    } : undefined
   }
 });

@@ -33,13 +33,13 @@ const Login = () => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setErrorMessage(null);
     
     try {
+      console.log("Login submit with API URL:", import.meta.env.VITE_API_URL);
       await login(formData.email, formData.password);
       
       // Show success state with session ID
@@ -51,7 +51,12 @@ const Login = () => {
         navigate('/dashboard');
       }, 2000);
     } catch (error: any) {
-      setErrorMessage(error.response?.data?.error || 'Authentication failed');
+      console.error('Login error details:', error);
+      if (error.message === 'Network Error') {
+        setErrorMessage('Network error - Check your connection and make sure the backend server is running. Contact support if this persists.');
+      } else {
+        setErrorMessage(error.response?.data?.error || 'Authentication failed');
+      }
       console.error('Login error:', error);
     } finally {
       setIsLoading(false);
