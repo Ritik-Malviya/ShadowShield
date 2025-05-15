@@ -25,35 +25,34 @@ api.interceptors.request.use(
 // Auth API endpoints
 export const authAPI = {
   login: async (credentials: { email: string; password: string }) => {
-    return api.post('/auth/login', credentials);
+    return api.post('/api/auth/login', credentials);
   },
   
   register: async (userData: { name: string; email: string; password: string }) => {
-    return api.post('/auth/register', userData);
+    return api.post('/api/auth/register', userData);
   },
   
   getProfile: async () => {
     // Change from '/auth/profile' to '/auth/me'
-    return api.get('/auth/me');
+    return api.get('/api/auth/me');
   },
-  
-  logout: async () => {
+    logout: async () => {
     // Client-side logout (no server endpoint needed)
     return Promise.resolve({ data: { success: true } });
   },
     updateProfile: async (userData: { name?: string; email?: string }) => {
-    return api.put('/auth/updatedetails', userData);
+    return api.put('/api/auth/updatedetails', userData);
   }
 };
 
 // File API endpoints
 export const fileAPI = {
   getFileInfo: async (fileId: string) => {
-    return api.get(`/files/${fileId}`);
+    return api.get(`/api/files/${fileId}`);
   },
   
   uploadFile: async (formData: FormData) => {
-    return api.post('/files', formData, {
+    return api.post('/api/files', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
@@ -62,14 +61,13 @@ export const fileAPI = {
   
   downloadFileWithCode: async (accessCode: string, options = {}) => {
     console.log("API call: downloadFileWithCode", accessCode, options);
-    return api.get(`/files/access/${accessCode}/download`, {
+    return api.get(`/api/files/access/${accessCode}/download`, {
       ...options,
       responseType: 'blob',
     });
   },
-  
-  verifyFile: async (formData: FormData) => {
-    return api.post('/files/verify', formData, {
+    verifyFile: async (formData: FormData) => {
+    return api.post('/api/files/verify', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
@@ -77,41 +75,41 @@ export const fileAPI = {
   },
   
   getFiles: async () => {
-    return api.get('/files');
+    return api.get('/api/files');
   },
   
   deleteFile: async (fileId: string) => {
-    return api.delete(`/files/${fileId}`);
+    return api.delete(`/api/files/${fileId}`);
   },
   
   getFileInfoByCode: async (accessCode: string) => {
     console.log(`Getting file info for code: ${accessCode}`);
-    return api.get(`/files/access/${accessCode}/info`);
+    return api.get(`/api/files/access/${accessCode}/info`);
   }
 };
 
 // Security API endpoints
 export const securityAPI = {
   getSecurityEvents: async (page: number = 1) => {
-    return api.get(`/security?page=${page}`);
+    return api.get(`/api/security?page=${page}`);
   },
   generateDemoEvents: async () => {
-    return api.post('/security/generate-demo');
+    return api.post('/api/security/generate-demo');
   }
 };
 
 // Activity API endpoints
 export const activityAPI = {
   getActivities: async (page: number = 1) => {
-    return api.get(`/activities?page=${page}`);
+    return api.get(`/api/activities?page=${page}`);
   },
   
   getRecentActivities: async (limit: number = 5) => {
-    return api.get(`/activities/recent?limit=${limit}`);
+    return api.get(`/api/activities/recent?limit=${limit}`);
   },
   
   getActivitySummary: async () => {
-    return api.get('/activities/summary');
+    return api.get('/api/activities/summary');
   }
 };
 
@@ -125,19 +123,19 @@ export const messageAPI = {
     selfDestruct?: boolean;
     priority?: string;
   }) => {
-    return api.post('/messages', messageData);
+    return api.post('/api/messages', messageData);
   },
   
   getMessages: async (type: 'inbox' | 'sent' = 'inbox') => {
-    return api.get(`/messages?type=${type}`);
+    return api.get(`/api/messages?type=${type}`);
   },
   
   getMessage: async (id: string) => {
-    return api.get(`/messages/${id}`);
+    return api.get(`/api/messages/${id}`);
   },
   
   deleteMessage: async (id: string) => {
-    return api.delete(`/messages/${id}`);
+    return api.delete(`/api/messages/${id}`);
   }
 };
 

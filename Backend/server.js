@@ -68,9 +68,25 @@ app.use(fileupload({
   responseOnLimit: "File size limit has been reached"
 }));
 
-// Enable CORS
+// Enable CORS with appropriate origins for deployment
 app.use(cors({
-  origin: "https://frontend-ritiks-projects-9f564ec3.vercel.app",
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps, curl, Postman)
+    if(!origin) return callback(null, true);
+    
+    const allowedOrigins = [
+      'https://frontend-ritiks-projects-9f564ec3.vercel.app',
+      'https://shadowshield.vercel.app',
+      'https://shadowshield-frontend.vercel.app'
+    ];
+    
+    // Check if the origin is allowed
+    if(allowedOrigins.indexOf(origin) !== -1 || origin.match(/\.vercel\.app$/)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
 
